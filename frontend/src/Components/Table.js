@@ -2,14 +2,12 @@ import React from "react";
 
 const Table = ({ transactions = [] }) => {
 
-  //  Get row background color based on status
   const getRowColor = (status) => {
     if (status === "flagged") return "#ffd6d6";
     if (status === "suspicious") return "#fff3cd";
     return "white";
   };
 
-  //  Get status badge
   const getStatus = (status) => {
     if (status === "flagged") return (
       <span style={{ color: "red", fontWeight: "bold" }}>⚠ Flagged</span>
@@ -22,14 +20,12 @@ const Table = ({ transactions = [] }) => {
     );
   };
 
-  //  Get risk score color
   const getRiskColor = (score) => {
     if (score >= 71) return "#dc3545";
     if (score >= 31) return "#f39c12";
     return "#28a745";
   };
 
-  //  Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
       day: '2-digit',
@@ -64,32 +60,46 @@ const Table = ({ transactions = [] }) => {
           borderRadius: "10px",
           fontSize: "13px"
         }}>
-          Last {transactions.length} transactions
+          {transactions.length === 0
+            ? "No transactions yet"
+            : `Last ${transactions.length} transactions`}
         </span>
       </div>
 
-      {/* ✅ Empty state */}
-      {transactions.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px", color: "#888" }}>
-          <h3>📋</h3>
-          <p>No transactions yet</p>
-        </div>
-      ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ background: "#f3f3f3" }}>
-              <th style={{ textAlign: "center", padding: "12px" }}>ID</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Sender</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Receiver</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Amount</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Date</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Risk Score</th>
-              <th style={{ textAlign: "center", padding: "12px" }}>Status</th>
-            </tr>
-          </thead>
+      {/* ✅ Always show table */}
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ background: "#f3f3f3" }}>
+            <th style={{ textAlign: "center", padding: "12px" }}>ID</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Sender</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Receiver</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Amount</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Date</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Risk Score</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Status</th>
+          </tr>
+        </thead>
 
-          <tbody>
-            {transactions.map((txn, index) => (
+        <tbody>
+          {transactions.length === 0 ? (
+            // ✅ Empty row with message instead of blank
+            <tr>
+              <td colSpan="7" style={{
+                textAlign: "center",
+                padding: "50px",
+                color: "#888"
+              }}>
+                <div style={{ fontSize: "30px", marginBottom: "10px" }}>📋</div>
+                <p style={{ margin: 0, fontWeight: "500" }}>
+                  No transactions yet
+                </p>
+                <p style={{ margin: "5px 0 0", fontSize: "13px" }}>
+                  Transactions will appear here automatically
+                </p>
+              </td>
+            </tr>
+          ) : (
+            transactions.map((txn, index) => (
               <tr
                 key={`${txn._id}-${index}`}
                 style={{
@@ -98,12 +108,9 @@ const Table = ({ transactions = [] }) => {
                   borderBottom: "1px solid #f0f0f0"
                 }}
               >
-                {/*  Transaction code */}
                 <td style={{ padding: "12px", fontSize: "13px", fontWeight: "500" }}>
                   {txn.txn_code || txn._id?.slice(-6)}
                 </td>
-
-                {/* Sender name + account */}
                 <td style={{ padding: "12px" }}>
                   <div style={{ fontWeight: "500" }}>
                     {txn.sender_id?.name || "Unknown"}
@@ -112,8 +119,6 @@ const Table = ({ transactions = [] }) => {
                     {txn.sender_account}
                   </div>
                 </td>
-
-                {/*  Receiver name + account */}
                 <td style={{ padding: "12px" }}>
                   <div style={{ fontWeight: "500" }}>
                     {txn.receiver_id?.name || "Unknown"}
@@ -122,18 +127,12 @@ const Table = ({ transactions = [] }) => {
                     {txn.receiver_account}
                   </div>
                 </td>
-
-                {/*  Amount */}
                 <td style={{ padding: "12px", fontWeight: "500" }}>
                   ₹{txn.amount?.toLocaleString('en-IN')}
                 </td>
-
-                {/* Date formatted */}
                 <td style={{ padding: "12px", fontSize: "13px" }}>
                   {formatDate(txn.createdAt)}
                 </td>
-
-                {/* ✅ Risk score with color */}
                 <td style={{ padding: "12px" }}>
                   <span style={{
                     backgroundColor: getRiskColor(txn.risk_score) + "22",
@@ -146,16 +145,14 @@ const Table = ({ transactions = [] }) => {
                     {txn.risk_score}/100
                   </span>
                 </td>
-
-                {/* Status badge */}
                 <td style={{ padding: "12px" }}>
                   {getStatus(txn.status)}
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
