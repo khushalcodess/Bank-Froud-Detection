@@ -25,15 +25,19 @@ const Dashboard = () => {
     fetchStats();
   }, []);
 
-  // ✅ Get fraud count based on active filter
+  //  Get fraud count based on active filter
   const getFraudCount = () => {
     if (!stats) return 0;
     if (activeFilter === "today") return stats.todayFraud || 0;
     if (activeFilter === "month") return stats.monthFraud || 0;
     if (activeFilter === "year") return stats.yearFraud || 0;
   };
-
-  // ✅ Get transaction count based on active filter
+  //  Add this function after getTransactionCount()
+const getPercent = (value, total) => {
+  if (!total || total === 0) return 0;
+  return Math.round((value / total) * 100);
+};
+  //  Get transaction count based on active filter
   const getTransactionCount = () => {
     if (!stats) return 0;
     if (activeFilter === "today") return stats.todayTransactions || 0;
@@ -41,7 +45,7 @@ const Dashboard = () => {
     if (activeFilter === "year") return stats.yearTransactions || 0;
   };
 
-  // ✅ Loading state
+  //  Loading state
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center"
@@ -59,7 +63,7 @@ const Dashboard = () => {
     );
   }
 
-  // ✅ Error state
+  //  Error state
   if (error) {
     return (
       <div className="d-flex justify-content-center align-items-center"
@@ -78,7 +82,7 @@ const Dashboard = () => {
     );
   }
 
-  // ✅ Button style helper
+  //  Button style helper
   const btnStyle = (filter) => ({
     padding: "8px 20px",
     marginRight: "10px",
@@ -91,7 +95,7 @@ const Dashboard = () => {
     transition: "all 0.2s"
   });
 
-  // ✅ Safe count for piechart
+  //  Safe count for piechart
   const safeCount = Math.max(0,
     (stats?.totalTransactions || 0) -
     (stats?.totalFlagged || 0) -
@@ -101,7 +105,7 @@ const Dashboard = () => {
   return (
     <div style={{ backgroundColor: "#f5f5f5", minHeight: "100vh", paddingBottom: "40px" }}>
 
-      {/* ✅ Header */}
+      {/*  Header */}
       <div style={{
         display: "flex",
         justifyContent: "space-between",
@@ -119,7 +123,7 @@ const Dashboard = () => {
         </span>
       </div>
 
-      {/* ✅ Filter Buttons */}
+      {/*  Filter Buttons */}
       <div style={{ marginLeft: "50px", marginBottom: "10px", marginTop: "10px" }}>
         <button style={btnStyle("today")} onClick={() => setActiveFilter("today")}>
           Today
@@ -132,7 +136,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* ✅ Active filter label */}
+      {/*  Active filter label */}
       <div style={{ marginLeft: "50px", marginBottom: "25px" }}>
         <span style={{
           backgroundColor: "#e8f5f5",
@@ -148,47 +152,62 @@ const Dashboard = () => {
         </span>
       </div>
 
-      {/* ✅ Stat Cards */}
-      <div className="d-flex justify-content-evenly flex-wrap" style={{ gap: "10px", padding: "0 30px" }}>
-        <StatCard
-          title="Total Users"
-          value={stats?.totalUsers || 0}
-          percent={62}
-          color="#2ce1b4"
-        />
-        <StatCard
-          title="Total Transactions"
-          value={getTransactionCount()}
-          percent={62}
-          color="#3523d7"
-        />
-        <StatCard
-          title="Fraud Detected"
-          value={getFraudCount()}
-          percent={62}
-          color="#dc3545"
-        />
-        <StatCard
-          title="Flagged"
-          value={stats?.totalFlagged || 0}
-          percent={62}
-          color="#8bd600"
-        />
-        <StatCard
-          title="Suspicious"
-          value={stats?.totalSuspicious || 0}
-          percent={62}
-          color="#f39c12"
-        />
-        <StatCard
-          title="Pending Alerts"
-          value={stats?.pendingAlerts || 0}
-          percent={72}
-          color="#e74c3c"
-        />
-      </div>
+{/* ✅ Stat Cards with real percentages */}
+<div className="d-flex justify-content-evenly flex-wrap" style={{ gap: "10px", padding: "0 30px" }}>
+  <StatCard
+    title="Total Users"
+    value={stats?.totalUsers || 0}
+    percent={100} // users dont have a percentage
+    color="#2ce1b4"
+  />
+  <StatCard
+    title="Total Transactions"
+    value={getTransactionCount()}
+    percent={getPercent(
+      getTransactionCount(),
+      stats?.totalTransactions || 0
+    )}
+    color="#3523d7"
+  />
+  <StatCard
+    title="Fraud Detected"
+    value={getFraudCount()}
+    percent={getPercent(
+      getFraudCount(),
+      getTransactionCount()
+    )}
+    color="#dc3545"
+  />
+  <StatCard
+    title="Flagged"
+    value={stats?.totalFlagged || 0}
+    percent={getPercent(
+      stats?.totalFlagged || 0,
+      stats?.totalTransactions || 0
+    )}
+    color="#8bd600"
+  />
+  <StatCard
+    title="Suspicious"
+    value={stats?.totalSuspicious || 0}
+    percent={getPercent(
+      stats?.totalSuspicious || 0,
+      stats?.totalTransactions || 0
+    )}
+    color="#f39c12"
+  />
+  <StatCard
+    title="Pending Alerts"
+    value={stats?.pendingAlerts || 0}
+    percent={getPercent(
+      stats?.pendingAlerts || 0,
+      stats?.totalFlagged + stats?.totalSuspicious || 0
+    )}
+    color="#e74c3c"
+  />
+</div>
 
-      {/* ✅ Fraud Summary Cards */}
+      {/*  Fraud Summary Cards */}
       <div className="d-flex justify-content-evenly mt-4 mx-4" style={{ gap: "15px" }}>
 
         {/* Today Card */}
@@ -324,7 +343,7 @@ const Dashboard = () => {
 
       </div>
 
-      {/* ✅ Recent Transactions Table */}
+      {/*  Recent Transactions Table */}
       <div style={{ margin: "40px 30px 0" }}>
         <Table transactions={stats?.recentTransactions || []} />
       </div>

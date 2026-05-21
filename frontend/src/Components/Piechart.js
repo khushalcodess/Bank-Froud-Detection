@@ -85,7 +85,7 @@ const Piechart = ({ safe = 0, suspicious = 0, flagged = 0 }) => {
       )}
     </div>
 
-    {/* ✅ Size controlled here — change 200px to your preference */}
+    {/*  Size controlled here — change 200px to your preference */}
     <div style={{ width: "400px", height: "400px", margin: "0 auto" }}>
       <Doughnut data={data} options={options} />
     </div>
