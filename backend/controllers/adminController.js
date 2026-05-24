@@ -217,3 +217,56 @@ exports.getMonthStats = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ─── SEARCH ────────────────────────────────────────────
+exports.searchAll = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q) return res.status(200).json([]);
+
+    const results = [];
+
+    // ✅ Search users by name, email, account number
+    const users = await User.find({
+      $or: [
+        { name: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } },
+        { account_number: { $regex: q, $options: "i" } }
+      ]
+    }).select("-password").limit(5);
+
+    users.forEach(u => results.push({
+      type: "user",
+      _id: u._id,
+      name: u.name,
+      email: u.email,
+      account_number: u.account_number,
+      status: u.status
+    }));
+
+    // ✅ Search transactions by txn_code, sender, receiver
+    const transactions = await Transaction.find({
+      $or: [
+        { txn_code: { $regex: q, $options: "i" } },
+        { sender_account: { $regex: q, $options: "i" } },
+        { receiver_account: { $regex: q, $options: "i" } }
+      ]
+    }).limit(5);
+
+    transactions.forEach(t => results.push({
+      type: "transaction",
+      _id: t._id,
+      txn_code: t.txn_code,
+      amount: t.amount,
+      status: t.status,
+      sender_account: t.sender_account,
+      receiver_account: t.receiver_account
+    }));
+
+    res.status(200).json(results);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
