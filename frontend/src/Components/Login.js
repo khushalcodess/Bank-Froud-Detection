@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import API from '../api/config'; // ✅ use config instead of axios directly
+import API from '../api/config'; //  use config instead of axios directly
 
 const Login = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false); // ✅ loading state
-  const [error, setError] = useState(""); // ✅ error state
+  const [loading, setLoading] = useState(false); // loading state
+  const [error, setError] = useState(""); // error state
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -19,11 +19,11 @@ const Login = () => {
     try {
       const res = await API.post('/auth/login', form);
 
-      // ✅ Save token and user info
+      //  Save token and user info
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // ✅ Role based redirect
+      //  Role based redirect
       if (res.data.user.role === "admin") {
         navigate("/Dashboard");
       } else {
@@ -42,7 +42,7 @@ const Login = () => {
       <div className="bg-white p-4 rounded shadow" style={{ width: "400px" }}>
         <h3 className="mb-4" style={{ color: "#0F3D3E" }}>Login</h3>
 
-        {/* ✅ Show error message */}
+        {/*  Show error message */}
         {error && (
           <div className="alert alert-danger py-2" role="alert">
             {error}
@@ -85,7 +85,7 @@ const Login = () => {
             </p>
           </div>
 
-          {/* ✅ Loading button */}
+          {/* Loading button */}
           <button
             type="submit"
             className="btn w-100"

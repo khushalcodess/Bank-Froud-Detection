@@ -67,7 +67,7 @@ const Nav = () => {
         boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
       }}>
 
-        {/* ✅ Left — Hamburger + Logo */}
+        {/*  Left — Hamburger + Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: "15px", flex: 1 }}>
           <button
             onClick={() => openset(true)}
@@ -95,7 +95,7 @@ const Nav = () => {
           </div>
         </div>
 
-        {/* ✅ Center — Search Bar */}
+        {/*  Center — Search Bar */}
         <div style={{ position: "relative", flex: 2, maxWidth: "500px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <input
@@ -130,7 +130,7 @@ const Nav = () => {
             </button>
           </div>
 
-          {/* ✅ Search Results Dropdown */}
+          {/*  Search Results Dropdown */}
           {showResults && (
             <div style={{
               position: "absolute",
@@ -215,7 +215,7 @@ const Nav = () => {
           )}
         </div>
 
-        {/* ✅ Right — Bell + Profile */}
+        {/*  Right — Bell + Profile */}
         <div style={{
           display: "flex",
           alignItems: "center",
