@@ -14,19 +14,30 @@ const UserDashboard = () => {
   }, []);
 
   const fetchData = async () => {
-    try {
-      const [profileRes, txnRes] = await Promise.all([
-        API.get('/auth/profile'),
-        API.get('/transactions/my')
-      ]);
-      setUserData(profileRes.data.user);
-      setTransactions(txnRes.data.transactions?.slice(0, 5) || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const [profileRes, txnRes] = await Promise.all([
+      API.get('/auth/profile'),
+      API.get('/transactions/my')
+    ]);
+
+    const profileData = profileRes.data.user;
+    setUserData(profileData);
+
+    // ✅ Update localStorage with latest balance and account_number
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    localStorage.setItem("user", JSON.stringify({
+      ...storedUser,
+      balance: profileData.balance,
+      account_number: profileData.account_number
+    }));
+
+    setTransactions(txnRes.data.transactions?.slice(0, 5) || []);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loading) {
     return (
