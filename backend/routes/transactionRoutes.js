@@ -9,7 +9,7 @@ const {
 } = require("../controllers/transactionController");
 
 router.post("/send",authMiddleware,maketransaction);
-router.get("/my",authMiddleware,maketransaction);
+router.get("/my",authMiddleware,getMyTransactions);
 
 router.get("/all",authMiddleware,getAllTransactions);
 

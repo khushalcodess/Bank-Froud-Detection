@@ -73,8 +73,8 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        account_number: user.account_number, // ✅ added
-        balance: user.balance                 // ✅ added
+        account_number: user.account_number, // 
+        balance: user.balance                 // 
       }
     });
 
