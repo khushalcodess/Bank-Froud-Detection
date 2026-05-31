@@ -153,31 +153,37 @@ const getPercent = (value, total) => {
       </div>
 
 {/* ✅ Stat Cards with real percentages */}
+{/* ✅ Fixed Stat Cards */}
 <div className="d-flex justify-content-evenly flex-wrap" style={{ gap: "10px", padding: "0 30px" }}>
+
+  {/* Always shows total users */}
   <StatCard
     title="Total Users"
     value={stats?.totalUsers || 0}
-    percent={100} // users dont have a percentage
+    percent={100}
     color="#2ce1b4"
   />
+
+  {/* ✅ Always shows ALL TIME total transactions */}
   <StatCard
     title="Total Transactions"
-    value={getTransactionCount()}
-    percent={getPercent(
-      getTransactionCount(),
-      stats?.totalTransactions || 0
-    )}
+    value={stats?.totalTransactions || 0}
+    percent={100}
     color="#3523d7"
   />
+
+  {/* Changes with filter */}
   <StatCard
     title="Fraud Detected"
     value={getFraudCount()}
     percent={getPercent(
       getFraudCount(),
-      getTransactionCount()
+      stats?.totalTransactions || 0
     )}
     color="#dc3545"
   />
+
+  {/* Always shows all time flagged */}
   <StatCard
     title="Flagged"
     value={stats?.totalFlagged || 0}
@@ -187,6 +193,8 @@ const getPercent = (value, total) => {
     )}
     color="#8bd600"
   />
+
+  {/* Always shows all time suspicious */}
   <StatCard
     title="Suspicious"
     value={stats?.totalSuspicious || 0}
@@ -196,130 +204,139 @@ const getPercent = (value, total) => {
     )}
     color="#f39c12"
   />
+
+  {/* Always shows pending alerts */}
   <StatCard
     title="Pending Alerts"
     value={stats?.pendingAlerts || 0}
     percent={getPercent(
       stats?.pendingAlerts || 0,
-      stats?.totalFlagged + stats?.totalSuspicious || 0
+      (stats?.totalFlagged || 0) + (stats?.totalSuspicious || 0)
     )}
     color="#e74c3c"
   />
+
 </div>
 
-      {/*  Fraud Summary Cards */}
-      <div className="d-flex justify-content-evenly mt-4 mx-4" style={{ gap: "15px" }}>
+     {/* ✅ Fixed Fraud Summary Cards */}
+<div className="d-flex justify-content-evenly mt-4 mx-4" style={{ gap: "15px" }}>
 
-        {/* Today Card */}
-        <div
-          onClick={() => setActiveFilter("today")}
-          style={{
-            background: activeFilter === "today" ? "#0F3D3E" : "white",
-            color: activeFilter === "today" ? "white" : "#0F3D3E",
-            padding: "20px 25px",
-            borderRadius: "12px",
-            textAlign: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            cursor: "pointer",
-            transition: "all 0.2s",
-            flex: 1
-          }}>
-          <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>
-            Today's Fraud
-          </p>
-          <h3 style={{ margin: "5px 0 0" }}>{stats?.todayFraud || 0}</h3>
-          <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
-            transactions
-          </p>
-        </div>
+  {/* Today Card */}
+  <div
+    onClick={() => setActiveFilter("today")}
+    style={{
+      background: activeFilter === "today" ? "#0F3D3E" : "white",
+      color: activeFilter === "today" ? "white" : "#0F3D3E",
+      padding: "20px 25px",
+      borderRadius: "12px",
+      textAlign: "center",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      cursor: "pointer",
+      transition: "all 0.2s",
+      flex: 1
+    }}>
+    <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>Today</p>
+    {/* ✅ Show transactions not just fraud */}
+    <h3 style={{ margin: "5px 0 0" }}>{stats?.todayTransactions || 0}</h3>
+    <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
+      transactions
+    </p>
+    <p style={{ margin: "3px 0 0", fontSize: "11px", opacity: 0.6 }}>
+      {stats?.todayFraud || 0} fraud
+    </p>
+  </div>
 
-        {/* This Month Card */}
-        <div
-          onClick={() => setActiveFilter("month")}
-          style={{
-            background: activeFilter === "month" ? "#0F3D3E" : "white",
-            color: activeFilter === "month" ? "white" : "#0F3D3E",
-            padding: "20px 25px",
-            borderRadius: "12px",
-            textAlign: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            cursor: "pointer",
-            transition: "all 0.2s",
-            flex: 1
-          }}>
-          <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>
-            This Month
-          </p>
-          <h3 style={{ margin: "5px 0 0" }}>{stats?.monthFraud || 0}</h3>
-          <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
-            transactions
-          </p>
-        </div>
+  {/* This Month Card */}
+  <div
+    onClick={() => setActiveFilter("month")}
+    style={{
+      background: activeFilter === "month" ? "#0F3D3E" : "white",
+      color: activeFilter === "month" ? "white" : "#0F3D3E",
+      padding: "20px 25px",
+      borderRadius: "12px",
+      textAlign: "center",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      cursor: "pointer",
+      transition: "all 0.2s",
+      flex: 1
+    }}>
+    <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>This Month</p>
+    {/* ✅ Show monthTransactions */}
+    <h3 style={{ margin: "5px 0 0" }}>{stats?.monthTransactions || 0}</h3>
+    <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
+      transactions
+    </p>
+    <p style={{ margin: "3px 0 0", fontSize: "11px", opacity: 0.6 }}>
+      {stats?.monthFraud || 0} fraud
+    </p>
+  </div>
 
-        {/* This Year Card */}
-        <div
-          onClick={() => setActiveFilter("year")}
-          style={{
-            background: activeFilter === "year" ? "#0F3D3E" : "white",
-            color: activeFilter === "year" ? "white" : "#0F3D3E",
-            padding: "20px 25px",
-            borderRadius: "12px",
-            textAlign: "center",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            cursor: "pointer",
-            transition: "all 0.2s",
-            flex: 1
-          }}>
-          <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>
-            This Year
-          </p>
-          <h3 style={{ margin: "5px 0 0" }}>{stats?.yearFraud || 0}</h3>
-          <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
-            transactions
-          </p>
-        </div>
+  {/* This Year Card */}
+  <div
+    onClick={() => setActiveFilter("year")}
+    style={{
+      background: activeFilter === "year" ? "#0F3D3E" : "white",
+      color: activeFilter === "year" ? "white" : "#0F3D3E",
+      padding: "20px 25px",
+      borderRadius: "12px",
+      textAlign: "center",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      cursor: "pointer",
+      transition: "all 0.2s",
+      flex: 1
+    }}>
+    <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>This Year</p>
+    {/* ✅ Show yearTransactions */}
+    <h3 style={{ margin: "5px 0 0" }}>{stats?.yearTransactions || 0}</h3>
+    <p style={{ margin: "5px 0 0", fontSize: "12px", opacity: 0.7 }}>
+      transactions
+    </p>
+    <p style={{ margin: "3px 0 0", fontSize: "11px", opacity: 0.6 }}>
+      {stats?.yearFraud || 0} fraud
+    </p>
+  </div>
 
-        {/* Today Transactions Card */}
-        <div style={{
-          background: "white",
-          padding: "20px 25px",
-          borderRadius: "12px",
-          textAlign: "center",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          flex: 1
-        }}>
-          <p style={{ color: "#888", margin: 0, fontSize: "13px" }}>
-            Today's Transactions
-          </p>
-          <h3 style={{ color: "#0F3D3E", margin: "5px 0 0" }}>
-            {stats?.todayTransactions || 0}
-          </h3>
-          <p style={{ color: "#888", margin: "5px 0 0", fontSize: "12px" }}>
-            total
-          </p>
-        </div>
+  {/* Safe Transactions */}
+  <div style={{
+    background: "white",
+    padding: "20px 25px",
+    borderRadius: "12px",
+    textAlign: "center",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    flex: 1
+  }}>
+    <p style={{ color: "#888", margin: 0, fontSize: "13px" }}>Safe</p>
+    <h3 style={{ color: "#28a745", margin: "5px 0 0" }}>
+      {(stats?.totalTransactions || 0) -
+       (stats?.totalFlagged || 0) -
+       (stats?.totalSuspicious || 0)}
+    </h3>
+    <p style={{ color: "#888", margin: "5px 0 0", fontSize: "12px" }}>
+      transactions
+    </p>
+  </div>
 
-        {/* Total Fraud Amount Card */}
-        <div style={{
-          background: "white",
-          padding: "20px 25px",
-          borderRadius: "12px",
-          textAlign: "center",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          flex: 1
-        }}>
-          <p style={{ color: "#888", margin: 0, fontSize: "13px" }}>
-            Pending Alerts
-          </p>
-          <h3 style={{ color: "#e74c3c", margin: "5px 0 0" }}>
-            {stats?.pendingAlerts || 0}
-          </h3>
-          <p style={{ color: "#888", margin: "5px 0 0", fontSize: "12px" }}>
-            need attention
-          </p>
-        </div>
+  {/* Pending Alerts */}
+  <div style={{
+    background: "white",
+    padding: "20px 25px",
+    borderRadius: "12px",
+    textAlign: "center",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+    flex: 1
+  }}>
+    <p style={{ color: "#888", margin: 0, fontSize: "13px" }}>
+      Pending Alerts
+    </p>
+    <h3 style={{ color: "#e74c3c", margin: "5px 0 0" }}>
+      {stats?.pendingAlerts || 0}
+    </h3>
+    <p style={{ color: "#888", margin: "5px 0 0", fontSize: "12px" }}>
+      need attention
+    </p>
+  </div>
 
-      </div>
+</div>
 
       {/* ✅ Charts Row */}
       <div className="d-flex" style={{ marginTop: "40px", padding: "0 30px", gap: "30px" }}>

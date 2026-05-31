@@ -64,8 +64,8 @@ const UserDashboard = () => {
       <div style={{ marginBottom: "25px" }}>
         <h2 style={{ color: "#0F3D3E", margin: 0 }}>
           Good {new Date().getHours() < 12 ? "Morning" :
-                new Date().getHours() < 17 ? "Afternoon" : "Evening"},
-          {user?.name}! 👋
+        new Date().getHours() < 17 ? "Afternoon" : "Evening"},{" "}
+        {user?.name}! 👋
         </h2>
         <p style={{ color: "#888", margin: "5px 0 0" }}>
           {new Date().toLocaleDateString('en-IN', {
