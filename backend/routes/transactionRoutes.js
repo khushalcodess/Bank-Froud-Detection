@@ -3,14 +3,13 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 
 const {
-    maketransaction,
-    getMyTransactions,
-    getAllTransactions
+  makeTransaction,      
+  getMyTransactions,
+  getAllTransactions
 } = require("../controllers/transactionController");
 
-router.post("/send",authMiddleware,maketransaction);
-router.get("/my",authMiddleware,getMyTransactions);
-
-router.get("/all",authMiddleware,getAllTransactions);
+router.post("/send", authMiddleware, makeTransaction);
+router.get("/my", authMiddleware, getMyTransactions);
+router.get("/all", authMiddleware, getAllTransactions);
 
 module.exports = router;

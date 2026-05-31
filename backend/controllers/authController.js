@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
       email,
       password: hashedPassword,
       role: "user",
-      balance: 10000,
+      balance: 1000000,
       account_number: "ACC" + Date.now() // ✅ auto generate
     });
 
