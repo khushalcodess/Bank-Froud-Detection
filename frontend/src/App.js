@@ -12,7 +12,7 @@ import Nav from './Components/Nav';
 import Footer from './Components/Footer';
 
 //  User imports
-import UserDashboard from './User/UserDashboard';
+import UserDashboard from './User/Userdashboard';
 import SendMoney from './User/SendMoney';
 import MyTransactions from './User/MyTransactions';
 import UserNav from './Components/UserNav';
