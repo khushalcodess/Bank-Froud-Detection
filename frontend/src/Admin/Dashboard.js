@@ -38,13 +38,7 @@ const getPercent = (value, total) => {
   return Math.round((value / total) * 100);
 };
   //  Get transaction count based on active filter
-  const getTransactionCount = () => {
-    if (!stats) return 0;
-    if (activeFilter === "today") return stats.todayTransactions || 0;
-    if (activeFilter === "month") return stats.monthTransactions || 0;
-    if (activeFilter === "year") return stats.yearTransactions || 0;
-  };
-
+  
   //  Loading state
   if (loading) {
     return (

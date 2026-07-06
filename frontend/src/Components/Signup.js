@@ -23,7 +23,7 @@ const Signup = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await API.post('/auth/signup', formData); //  use API
+      await API.post('/auth/signup', formData);
 
       setSuccess("Account created successfully! Redirecting...");
       setFormData({ name: "", email: "", password: "" });
