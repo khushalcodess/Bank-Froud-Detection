@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const adminMiddleware = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
 
@@ -10,10 +10,6 @@ const adminMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
 
-    if (decoded.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-
     req.user = decoded;
     next();
 
@@ -22,4 +18,4 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
-module.exports = adminMiddleware;
+module.exports = authMiddleware;
