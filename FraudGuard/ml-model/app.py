@@ -4,17 +4,25 @@ import pickle
 import json
 import numpy as np
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# ✅ Load V2 model
+# ✅ Load model with error handling
 print("Loading V2 model...")
-model = pickle.load(open('models/fraud_model_v2.pkl', 'rb'))
-scaler = pickle.load(open('models/scaler_v2.pkl', 'rb'))
-explainer = pickle.load(open('models/shap_explainer_v2.pkl', 'rb'))
-feature_names = json.load(open('models/feature_names_v2.json', 'r'))
-print("✅ V2 Model loaded!")
+try:
+    model = pickle.load(open('models/fraud_model_v2.pkl', 'rb'))
+    scaler = pickle.load(open('models/scaler_v2.pkl', 'rb'))
+    explainer = pickle.load(open('models/shap_explainer_v2.pkl', 'rb'))
+    feature_names = json.load(open('models/feature_names_v2.json', 'r'))
+    print("✅ V2 Model loaded!")
+except Exception as e:
+    print(f"❌ Error loading model: {e}")
+    model = None
+    scaler = None
+    explainer = None
+    feature_names = []
 
 @app.route('/', methods=['GET'])
 def home():
@@ -22,15 +30,22 @@ def home():
         'message': 'FraudGuard ML API V2 running!',
         'model': 'XGBoost V2',
         'features': feature_names,
-        'status': 'active'
+        'status': 'active' if model else 'model not loaded'
     })
 
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
+        # ✅ Check model loaded
+        if model is None:
+            return jsonify({
+                'success': False,
+                'error': 'Model not loaded'
+            }), 500
+
         data = request.json
 
-        # ✅ Extract real features from transaction
+        # ✅ Extract features
         amount = data.get('amount', 0)
         hour = data.get('hour', datetime.now().hour)
         day_of_week = data.get('day_of_week', datetime.now().weekday())
@@ -83,8 +98,6 @@ def predict():
         reasons = []
         for feature, value in top_reasons:
             impact = 'increases fraud risk' if value > 0 else 'decreases fraud risk'
-
-            # ✅ Human readable reason
             readable = {
                 'amount_ratio': f'Amount is {amount_ratio:.1f}x your normal spending',
                 'freq_1hr': f'{freq_1hr} transactions in last hour',
@@ -92,10 +105,10 @@ def predict():
                 'is_night': 'Transaction at night time' if is_night else 'Normal time',
                 'is_weekend': 'Weekend transaction' if is_weekend else 'Weekday transaction',
                 'freq_24hr': f'{freq_24hr} transactions today',
-                'amount': f'Transaction amount ₹{amount}',
+                'amount': f'Transaction amount {amount}',
                 'hour': f'Transaction at {hour}:00',
                 'day_of_week': f'Day {day_of_week} of week',
-                'user_avg_amount': f'Your average: ₹{user_avg_amount:.0f}'
+                'user_avg_amount': f'Your average: {user_avg_amount:.0f}'
             }
 
             reasons.append({
@@ -120,4 +133,6 @@ def predict():
         }), 500
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    # ✅ Use PORT environment variable for Render
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

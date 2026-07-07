@@ -5,86 +5,68 @@ const Alertcard = ({ alert, onUpdate }) => {
   const [loading, setLoading] = useState("");
   const [showDetails, setShowDetails] = useState(false);
 
-  //  Get card border color based on risk
   const getRiskColor = (score) => {
     if (score >= 71) return "#dc3545";
     if (score >= 31) return "#f39c12";
     return "#28a745";
   };
 
-  //  Get risk label
   const getRiskLabel = (score) => {
     if (score >= 71) return "🔴 High Risk";
     if (score >= 31) return "🟡 Suspicious";
     return "🟢 Low Risk";
   };
 
-  //  Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-IN', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
     });
   };
 
-  //  Block user
+  // ✅ Fixed - renamed alert param to avoid conflict
   const handleBlock = async () => {
     setLoading("block");
     try {
       await updateUser(alert.sender_id?._id, "blocked");
       await updateAlert(alert._id, "resolved");
       onUpdate(alert._id, "resolved");
-      alert("User blocked successfully!");
     } catch (err) {
-      alert("Failed to block user");
+      console.error("Failed to block user", err);
     } finally {
       setLoading("");
     }
   };
 
-  //  Mark as safe
   const handleMarkSafe = async () => {
     setLoading("safe");
     try {
       await updateAlert(alert._id, "resolved");
       onUpdate(alert._id, "resolved");
     } catch (err) {
-      alert("Failed to mark safe");
+      console.error("Failed to mark safe", err);
     } finally {
       setLoading("");
     }
   };
 
-  //  Get status badge
   const getStatusBadge = (status) => {
     if (status === "resolved") return (
       <span style={{
-        backgroundColor: "#d4edda",
-        color: "#28a745",
-        padding: "3px 10px",
-        borderRadius: "10px",
-        fontSize: "12px"
+        backgroundColor: "#d4edda", color: "#28a745",
+        padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "500"
       }}>✅ Resolved</span>
     );
     if (status === "ignored") return (
       <span style={{
-        backgroundColor: "#e2e3e5",
-        color: "#666",
-        padding: "3px 10px",
-        borderRadius: "10px",
-        fontSize: "12px"
+        backgroundColor: "#e2e3e5", color: "#666",
+        padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "500"
       }}>Ignored</span>
     );
     return (
       <span style={{
-        backgroundColor: "#ffd6d6",
-        color: "#dc3545",
-        padding: "3px 10px",
-        borderRadius: "10px",
-        fontSize: "12px"
+        backgroundColor: "#ffd6d6", color: "#dc3545",
+        padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "500"
       }}>⚠ Pending</span>
     );
   };
@@ -94,144 +76,154 @@ const Alertcard = ({ alert, onUpdate }) => {
   return (
     <div style={{
       background: "white",
-      borderRadius: "12px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-      border: `2px solid ${riskColor}22`,
+      borderRadius: "16px",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+      border: `1px solid ${riskColor}33`,
       borderTop: `4px solid ${riskColor}`,
-      overflow: "hidden"
-    }}>
+      overflow: "hidden",
+      transition: "transform 0.2s, box-shadow 0.2s"
+    }}
+      onMouseEnter={e => {
+        e.currentTarget.style.transform = "translateY(-3px)";
+        e.currentTarget.style.boxShadow = "0 8px 25px rgba(0,0,0,0.12)";
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 4px 15px rgba(0,0,0,0.08)";
+      }}
+    >
       <div style={{ padding: "20px" }}>
 
-        {/*  Risk label + status */}
+        {/* Risk + Status */}
         <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "15px"
+          display: "flex", justifyContent: "space-between",
+          alignItems: "center", marginBottom: "15px"
         }}>
-          <span style={{
-            color: riskColor,
-            fontWeight: "600",
-            fontSize: "14px"
-          }}>
+          <span style={{ color: riskColor, fontWeight: "700", fontSize: "14px" }}>
             {getRiskLabel(alert.risk_score)}
           </span>
           {getStatusBadge(alert.status)}
         </div>
 
-        {/*  Alert details */}
-        <div style={{ fontSize: "14px", lineHeight: "2" }}>
-          <p style={{ margin: 0 }}>
-            <strong>User:</strong> {alert.sender_id?.name || "Unknown"}
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>Email:</strong> {alert.sender_id?.email || "N/A"}
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>Amount:</strong> ₹{alert.transaction_id?.amount?.toLocaleString('en-IN') || 0}
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>Transaction ID:</strong> {alert.transaction_id?.txn_code || "N/A"}
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>Risk Score:</strong>{" "}
+        {/* Risk Score Bar */}
+        <div style={{ marginBottom: "15px" }}>
+          <div style={{
+            display: "flex", justifyContent: "space-between",
+            marginBottom: "5px", fontSize: "12px", color: "#888"
+          }}>
+            <span>Risk Score</span>
             <span style={{ color: riskColor, fontWeight: "600" }}>
               {alert.risk_score}/100
             </span>
-          </p>
-          <p style={{ margin: 0 }}>
-            <strong>Time:</strong> {formatDate(alert.createdAt)}
-          </p>
+          </div>
+          <div style={{
+            height: "6px", backgroundColor: "#f0f0f0",
+            borderRadius: "10px", overflow: "hidden"
+          }}>
+            <div style={{
+              height: "100%",
+              width: `${alert.risk_score}%`,
+              backgroundColor: riskColor,
+              borderRadius: "10px",
+              transition: "width 0.5s ease"
+            }} />
+          </div>
         </div>
 
-        {/*  View Details Toggle */}
+        {/* Details */}
+        <div style={{
+          fontSize: "13px", lineHeight: "1.8",
+          backgroundColor: "#f8f9fa", borderRadius: "10px", padding: "12px"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+            <span style={{ color: "#888" }}>User</span>
+            <span style={{ fontWeight: "500" }}>{alert.sender_id?.name || "Unknown"}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+            <span style={{ color: "#888" }}>Amount</span>
+            <span style={{ fontWeight: "600", color: "#dc3545" }}>
+              ₹{alert.transaction_id?.amount?.toLocaleString('en-IN') || 0}
+            </span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+            <span style={{ color: "#888" }}>Txn ID</span>
+            <span style={{ fontWeight: "500", fontSize: "12px" }}>
+              {alert.transaction_id?.txn_code || "N/A"}
+            </span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span style={{ color: "#888" }}>Time</span>
+            <span style={{ fontSize: "12px" }}>{formatDate(alert.createdAt)}</span>
+          </div>
+        </div>
+
+        {/* View Details */}
         {showDetails && (
           <div style={{
-            marginTop: "15px",
-            padding: "12px",
-            backgroundColor: "#f8f9fa",
-            borderRadius: "8px",
-            fontSize: "13px"
+            marginTop: "12px", padding: "12px",
+            backgroundColor: "#fff3cd", borderRadius: "10px",
+            fontSize: "13px", border: "1px solid #ffeeba"
           }}>
-            <p style={{ margin: "0 0 5px", fontWeight: "500" }}>
-              Reason:
+            <p style={{ margin: "0 0 6px", fontWeight: "600", color: "#856404" }}>
+              📋 Transaction Details
+            </p>
+            <p style={{ margin: "0 0 4px", color: "#666" }}>
+              <strong>Reason:</strong> {alert.reason || "No reason provided"}
+            </p>
+            <p style={{ margin: "0 0 4px", color: "#666" }}>
+              <strong>From:</strong> {alert.transaction_id?.sender_account || "N/A"}
             </p>
             <p style={{ margin: 0, color: "#666" }}>
-              {alert.reason || "No reason provided"}
-            </p>
-            <p style={{ margin: "8px 0 5px", fontWeight: "500" }}>
-              Sender Account:
-            </p>
-            <p style={{ margin: 0, color: "#666" }}>
-              {alert.transaction_id?.sender_account || "N/A"}
-            </p>
-            <p style={{ margin: "8px 0 5px", fontWeight: "500" }}>
-              Receiver Account:
-            </p>
-            <p style={{ margin: 0, color: "#666" }}>
-              {alert.transaction_id?.receiver_account || "N/A"}
+              <strong>To:</strong> {alert.transaction_id?.receiver_account || "N/A"}
             </p>
           </div>
         )}
 
-        {/*  Action Buttons */}
+        {/* Action Buttons */}
         <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginTop: "20px",
-          gap: "8px"
+          display: "flex", gap: "8px", marginTop: "15px"
         }}>
-          {/* View button */}
           <button
             onClick={() => setShowDetails(!showDetails)}
             style={{
-              flex: 1,
-              padding: "8px",
-              backgroundColor: "#0F3D3E",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "13px"
+              flex: 1, padding: "9px",
+              backgroundColor: "white", color: "#0F3D3E",
+              border: "1.5px solid #0F3D3E", borderRadius: "8px",
+              cursor: "pointer", fontSize: "13px", fontWeight: "500",
+              transition: "all 0.2s"
             }}
           >
-            {showDetails ? "Hide" : "View"}
+            {showDetails ? "👆 Hide" : "👁️ View"}
           </button>
 
-          {/* Block button */}
           <button
             onClick={handleBlock}
             disabled={loading === "block" || alert.status === "resolved"}
             style={{
-              flex: 1,
-              padding: "8px",
-              backgroundColor: alert.status === "resolved" ? "#ccc" : "#dc3545",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
+              flex: 1, padding: "9px",
+              backgroundColor: alert.status === "resolved" ? "#e5e7eb" : "#dc3545",
+              color: alert.status === "resolved" ? "#9ca3af" : "white",
+              border: "none", borderRadius: "8px",
               cursor: alert.status === "resolved" ? "not-allowed" : "pointer",
-              fontSize: "13px"
+              fontSize: "13px", fontWeight: "500", transition: "all 0.2s"
             }}
           >
-            {loading === "block" ? "..." : "Block"}
+            {loading === "block" ? "⏳" : "🚫 Block"}
           </button>
 
-          {/* Mark Safe button */}
           <button
             onClick={handleMarkSafe}
             disabled={loading === "safe" || alert.status === "resolved"}
             style={{
-              flex: 1,
-              padding: "8px",
-              backgroundColor: alert.status === "resolved" ? "#ccc" : "#28a745",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
+              flex: 1, padding: "9px",
+              backgroundColor: alert.status === "resolved" ? "#e5e7eb" : "#28a745",
+              color: alert.status === "resolved" ? "#9ca3af" : "white",
+              border: "none", borderRadius: "8px",
               cursor: alert.status === "resolved" ? "not-allowed" : "pointer",
-              fontSize: "13px"
+              fontSize: "13px", fontWeight: "500", transition: "all 0.2s"
             }}
           >
-            {loading === "safe" ? "..." : "Mark Safe"}
+            {loading === "safe" ? "⏳" : "✅ Safe"}
           </button>
         </div>
 

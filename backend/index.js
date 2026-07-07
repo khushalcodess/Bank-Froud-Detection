@@ -1,35 +1,33 @@
 const connecttomongo = require('./db');
 const express = require('express');
-
-const app = express();
-const port = 3001;
 const cors = require('cors');
 
+const app = express();
+const port = process.env.PORT || 3001; // ✅ use env PORT for Render
+
+// ✅ Fixed CORS - allow Vercel
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://bank-froud.vercel.app',
+    'https://bank-froud-detection.vercel.app',
+    /\.vercel\.app$/ // ← allows ALL vercel URLs
+  ],
   credentials: true
 }));
-// ✅ Middleware (VERY IMPORTANT)
-app.use(express.json());
 
-// ✅ Connect DB (ONLY ONCE)
+app.use(express.json());
 connecttomongo();
 
-// ✅ Routes
+// ✅ All routes together
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
-// ✅ Test Route
+app.use('/api/admin', require('./routes/adminRoutes'));
+
 app.get('/', (req, res) => {
-  res.send("API Running");
+  res.send("FraudGuard API Running ✅");
 });
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
-
-// Add this test route BEFORE admin route
-app.get('/api/admin/test', (req, res) => {
-  res.json({ message: "Admin route working!" });
-});
-
-app.use('/api/admin', require('./routes/adminRoutes'));

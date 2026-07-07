@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS, LineElement, CategoryScale,
-  LinearScale, PointElement, Tooltip, Legend
+  LinearScale, PointElement, Tooltip, Legend, Filler
 } from "chart.js";
 import { getTodayStats, getMonthStats, getYearlyStats } from '../api/admin';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale,
-  PointElement, Tooltip, Legend);
+  PointElement, Tooltip, Legend, Filler);
 
-const FraudChart = ({ data = [], activeFilter }) => {
-
+const FraudChart = ({ activeFilter }) => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +36,6 @@ const FraudChart = ({ data = [], activeFilter }) => {
     fetchChartData();
   }, [activeFilter]);
 
-  //  Extract labels
   const labels = chartData.length > 0
     ? chartData.map(d => d.label || d.date || d.month || "")
     : activeFilter === "today"
@@ -47,12 +45,12 @@ const FraudChart = ({ data = [], activeFilter }) => {
         : ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  //  Extract fraud counts — always show 0s if no fraud
   const fraudCounts = chartData.length > 0
     ? chartData.map(d => d.fraud !== undefined ? d.fraud : d.count || 0)
-    : new Array(labels.length).fill(0); //  zeros instead of empty
+    : new Array(labels.length).fill(0);
 
-  //  Chart title based on filter
+  const allZero = fraudCounts.every(c => c === 0);
+
   const chartTitle = () => {
     if (activeFilter === "today") return "Today's Fraud (Hourly)";
     if (activeFilter === "month") return "This Month's Fraud (Daily)";
@@ -60,39 +58,66 @@ const FraudChart = ({ data = [], activeFilter }) => {
     return "Fraud Transactions";
   };
 
-  //  Check if all zeros for subtitle message
-  const allZero = fraudCounts.every(c => c === 0);
-
   const lineData = {
     labels,
-    datasets: [
-      {
-        label: "Fraud Transactions",
-        data: fraudCounts,
-        borderColor: "#dc3545",
-        backgroundColor: "rgba(220,53,69,0.2)",
-        tension: 0.4,
-        fill: true,
-        pointRadius: allZero ? 0 : 4, //  hide dots if all zero
-      }
-    ]
+    datasets: [{
+      label: "Fraud Transactions",
+      data: fraudCounts,
+      borderColor: "#dc3545",
+      backgroundColor: "rgba(220,53,69,0.08)",
+      tension: 0.4,
+      fill: true,
+      pointRadius: allZero ? 0 : 5,
+      pointBackgroundColor: "#dc3545",
+      pointBorderColor: "white",
+      pointBorderWidth: 2,
+      borderWidth: 2.5
+    }]
   };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
-      legend: { position: "top" },
+      legend: {
+        position: "top",
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: { size: 13 }
+        }
+      },
       tooltip: {
+        backgroundColor: "#0F3D3E",
+        titleColor: "white",
+        bodyColor: "white",
+        padding: 12,
+        cornerRadius: 10,
         callbacks: {
-          label: (context) => `Fraud: ${context.parsed.y}`
+          label: (context) => ` Fraud: ${context.parsed.y}`
         }
       }
     },
     scales: {
       y: {
         beginAtZero: true,
-        max: allZero ? 5 : undefined, //  show scale even if all zero
-        ticks: { stepSize: 1 }
+        max: allZero ? 5 : undefined,
+        ticks: {
+          stepSize: 1,
+          color: "#888",
+          font: { size: 12 }
+        },
+        grid: {
+          color: "rgba(0,0,0,0.05)"
+        }
+      },
+      x: {
+        ticks: {
+          color: "#888",
+          font: { size: 11 },
+          maxRotation: 45
+        },
+        grid: { display: false }
       }
     }
   };
@@ -100,49 +125,69 @@ const FraudChart = ({ data = [], activeFilter }) => {
   return (
     <div style={{
       backgroundColor: "white",
-      padding: "5%",
-      paddingRight: "6%",
-      borderRadius: "10px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+      borderRadius: "16px",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+      overflow: "hidden"
     }}>
-      <div className='p-4 mt-2'>
-
-        {/* Title + no fraud badge */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "10px"
-        }}>
-          <h5 style={{ color: "#0F3D3E", margin: 0 }}>{chartTitle()}</h5>
-
-          {/*  Show green badge when no fraud */}
-          {allZero && (
-            <span style={{
-              backgroundColor: "#d4edda",
-              color: "#28a745",
-              padding: "4px 12px",
-              borderRadius: "10px",
-              fontSize: "13px",
-              fontWeight: "500"
-            }}>
-               No Fraud Detected
-            </span>
-          )}
+      {/* Header */}
+      <div style={{
+        padding: "20px 25px 15px",
+        borderBottom: "1px solid #f5f5f5",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center"
+      }}>
+        <div>
+          <h5 style={{ color: "#0F3D3E", margin: 0, fontWeight: "600" }}>
+            {chartTitle()}
+          </h5>
+          <p style={{ color: "#888", fontSize: "13px", margin: "4px 0 0" }}>
+            Fraud transaction trends
+          </p>
         </div>
+        {allZero && (
+          <span style={{
+            backgroundColor: "#f0fdf4",
+            color: "#16a34a",
+            padding: "6px 14px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: "500",
+            border: "1px solid #86efac"
+          }}>
+            ✅ No Fraud Detected
+          </span>
+        )}
+      </div>
 
-        {/*  Loading */}
+      {/* Chart */}
+      <div style={{ padding: "20px 25px 25px" }}>
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px" }}>
-            <div className="spinner-border" style={{ color: "#0F3D3E" }} />
-            <p className="mt-2" style={{ color: "#0F3D3E" }}>Loading chart...</p>
+          <div style={{
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            height: "250px", color: "#888"
+          }}>
+            <div style={{
+              width: "40px", height: "40px",
+              border: "3px solid #e5e7eb",
+              borderTopColor: "#0F3D3E",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+              marginBottom: "12px"
+            }} />
+            <p style={{ margin: 0, fontSize: "14px" }}>Loading chart data...</p>
           </div>
         ) : (
-          //  Always show chart — never blank!
           <Line data={lineData} options={options} />
         )}
-
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

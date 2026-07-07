@@ -3,7 +3,6 @@ const Alert = require("../models/Alert");
 const User = require("../models/User");
 const axios = require("axios");
 
-
 exports.makeTransaction = async (req, res) => {
   try {
     const { receiver_account, amount } = req.body;
@@ -51,8 +50,11 @@ exports.makeTransaction = async (req, res) => {
     let reasons = [];
 
     try {
+      // ✅ Use environment variable for ML API URL
+      const ML_URL = process.env.ML_API_URL || 'http://127.0.0.1:5000';
+
       const mlResponse = await axios.post(
-        'http://127.0.0.1:5000/predict',
+        `${ML_URL}/predict`,
         {
           amount,
           hour,
@@ -61,17 +63,27 @@ exports.makeTransaction = async (req, res) => {
           freq_24hr,
           is_new_receiver,
           user_avg_amount
-        }
+        },
+        { timeout: 10000 } // ✅ 10 second timeout
       );
+
       risk_score = mlResponse.data.risk_score;
       status = mlResponse.data.status;
       reasons = mlResponse.data.reasons.map(r => r.readable);
 
     } catch (mlError) {
-      console.log("ML model error:", mlError.message);
+      // ✅ Fallback rule-based scoring if ML fails
+      console.log("ML model error, using rule-based:", mlError.message);
+
       if (amount > 50000) { risk_score += 40; reasons.push("Very high amount"); }
-      if (freq_1hr >= 5) { risk_score += 30; reasons.push("Too many transactions"); }
-      if (is_new_receiver) { risk_score += 20; reasons.push("New receiver"); }
+      if (amount > 20000) { risk_score += 20; reasons.push("High amount"); }
+      if (freq_1hr >= 5) { risk_score += 30; reasons.push("Too many transactions in last hour"); }
+      else if (freq_1hr >= 3) { risk_score += 15; reasons.push("Multiple transactions in last hour"); }
+      if (is_new_receiver) { risk_score += 20; reasons.push("New receiver account"); }
+
+      const isNight = hour >= 22 || hour <= 6;
+      if (isNight) { risk_score += 10; reasons.push("Transaction at unusual time"); }
+
       risk_score = Math.min(risk_score, 100);
       if (risk_score >= 71) status = 'flagged';
       else if (risk_score >= 31) status = 'suspicious';
@@ -91,11 +103,13 @@ exports.makeTransaction = async (req, res) => {
       reasons
     });
 
+    // ✅ Deduct balance for safe and suspicious only
     if (status !== 'flagged') {
       await User.findByIdAndUpdate(sender_id, { $inc: { balance: -amount } });
       await User.findByIdAndUpdate(receiver._id, { $inc: { balance: amount } });
     }
 
+    // ✅ Create alert for flagged and suspicious
     if (status === 'flagged' || status === 'suspicious') {
       await Alert.create({
         transaction_id: transaction._id,
@@ -120,7 +134,6 @@ exports.makeTransaction = async (req, res) => {
   }
 };
 
-
 exports.getMyTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find({
@@ -139,7 +152,6 @@ exports.getMyTransactions = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 exports.getAllTransactions = async (req, res) => {
   try {
