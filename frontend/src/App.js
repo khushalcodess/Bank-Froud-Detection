@@ -1,74 +1,78 @@
-import './App.css';
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
-import Login from './Components/Login';
-import Signup from './Components/Signup';
+import "./App.css";
 
-// Admin imports
-import Dashboard from './Admin/Dashboard';
-import Transaction from './Admin/Transaction';
-import Alert from './Admin/Alert';
-import Users from './Admin/Users';
-import Nav from './Components/Nav';
-import Footer from './Components/Footer';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-//  User imports
-import UserDashboard from './User/Userdashboard';
-import SendMoney from './User/SendMoney';
-import MyTransactions from './User/MyTransactions';
-import UserNav from './Components/UserNav';
-import UserSidebar from './Components/UserSidebar';
+import Login from "./Components/auth/Login";
+import Signup from "./Components/auth/Signup";
 
-// Admin Layout
-function AdminLayout() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <Nav />
-      <div className="main-content">
-        <Outlet />
-      </div>
-      <Footer />
-    </div>
-  );
-}
+import AdminLayout from "./Components/layout/AdminLayout";
+import UserLayout from "./Components/layout/UserLayout";
 
-//  User Layout
-function UserLayout() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <UserNav />
-      <div style={{ display: 'flex', flex: 1 }}>
-        <UserSidebar />
-        <div style={{ flex: 1, backgroundColor: "#f5f5f5", padding: "20px" }}>
-          <Outlet />
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
-}
+// Landing
+import LandingPage from "./pages/landing/LandingPage";
+
+// Admin Pages
+import Dashboard from "./pages/admin/Dashboard";
+import Transactions from "./pages/admin/Transactions";
+import Alerts from "./pages/admin/Alerts";
+import Users from "./pages/admin/Users";
+
+// User Pages
+import UserDashboard from "./pages/user/Dashboard";
+import SendMoney from "./pages/user/SendMoney";
+import MyTransactions from "./pages/user/MyTransactions";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Auth pages */}
-        <Route path="/" element={<Login />} />
+        {/* Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Authentication */}
+        <Route path="/login" element={<Login />} />
         <Route path="/Signup" element={<Signup />} />
 
-        {/* Admin pages */}
+        {/* Admin Routes */}
         <Route element={<AdminLayout />}>
-          <Route path="/Dashboard" element={<Dashboard />} />
-          <Route path="/Transactions" element={<Transaction />} />
-          <Route path="/Alert" element={<Alert />} />
-          <Route path="/Users" element={<Users />} />
+          <Route
+            path="/Dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/Transactions"
+            element={<Transactions />}
+          />
+
+          <Route
+            path="/Alert"
+            element={<Alerts />}
+          />
+
+          <Route
+            path="/Users"
+            element={<Users />}
+          />
         </Route>
 
-        {/*  User pages */}
+        {/* User Routes */}
         <Route element={<UserLayout />}>
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/send-money" element={<SendMoney />} />
-          <Route path="/my-transactions" element={<MyTransactions />} />
+          <Route
+            path="/user-dashboard"
+            element={<UserDashboard />}
+          />
+
+          <Route
+            path="/send-money"
+            element={<SendMoney />}
+          />
+
+          <Route
+            path="/my-transactions"
+            element={<MyTransactions />}
+          />
         </Route>
 
       </Routes>
