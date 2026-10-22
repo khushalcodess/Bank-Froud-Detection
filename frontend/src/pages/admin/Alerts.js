@@ -10,6 +10,21 @@ const Alert = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // ✅ NEW: track screen width
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isMobile = width <= 640;
+  const isTablet = width > 640 && width <= 1024;
+
+  // ✅ NEW: columns based on screen size
+  const columns = isMobile ? 1 : isTablet ? 2 : 3;
+
   // Fetch alerts from backend
   useEffect(() => {
     fetchAlerts();
@@ -131,6 +146,9 @@ const Alert = () => {
         backgroundColor: "#f5f5f5",
         minHeight: "100vh",
         paddingBottom: "40px",
+        width: "100%",
+        boxSizing: "border-box",
+        overflowX: "hidden",
       }}
     >
       {/* Header */}
@@ -139,13 +157,16 @@ const Alert = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "20px 50px 10px",
+          gap: "10px",
+          flexWrap: "wrap",
+          padding: isMobile ? "16px 16px 8px" : "20px 50px 10px",
         }}
       >
         <h2
           style={{
             color: "#0F3D3E",
             margin: 0,
+            fontSize: isMobile ? "22px" : undefined,
           }}
         >
           Fraud Alerts
@@ -176,7 +197,7 @@ const Alert = () => {
         <div
           style={{
             textAlign: "center",
-            padding: "80px",
+            padding: isMobile ? "40px 16px" : "80px",
             color: "#888",
           }}
         >
@@ -196,10 +217,11 @@ const Alert = () => {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(3, 1fr)",
-            gap: "20px",
-            padding: "20px 30px",
+            // ✅ minmax(0, 1fr) stops cards from overflowing their column
+            gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+            gap: isMobile ? "16px" : "20px",
+            padding: isMobile ? "16px" : "20px 30px",
+            boxSizing: "border-box",
           }}
         >
           {filtered.map((alert) => (

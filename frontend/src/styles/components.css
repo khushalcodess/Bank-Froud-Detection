@@ -2344,6 +2344,10 @@
   transition:
     transform var(--transition-normal),
     box-shadow var(--transition-normal);
+
+  width: 100%;              /* ✅ */
+  min-width: 0;             /* ✅ lets card shrink inside the grid */
+  box-sizing: border-box;   /* ✅ */
 }
 
 .fg-alert-card:hover {
@@ -2353,6 +2357,8 @@
 
 .fg-alert-card-body {
   padding: var(--space-5);
+  min-width: 0;             /* ✅ */
+  box-sizing: border-box;   /* ✅ */
 }
 
 /* Risk + Status */
@@ -2361,6 +2367,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;          /* ✅ */
   gap: var(--space-3);
   margin-bottom: var(--space-4);
 }
@@ -2376,6 +2383,7 @@
   border-radius: 999px;
   font-size: var(--font-size-xs);
   font-weight: 500;
+  white-space: nowrap;      /* ✅ */
 }
 
 .fg-alert-status-resolved {
@@ -2403,6 +2411,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;                 /* ✅ */
   margin-bottom: var(--space-2);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
@@ -2411,6 +2420,7 @@
 .fg-alert-risk-score {
   color: var(--risk-color);
   font-weight: 600;
+  white-space: nowrap;      /* ✅ */
 }
 
 .fg-alert-risk-bar {
@@ -2434,11 +2444,12 @@
   background: var(--color-background);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
+  min-width: 0;             /* ✅ */
 }
 
 .fg-alert-detail-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;  /* ✅ was center, so wrapped values align to top */
   justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: 6px;
@@ -2450,11 +2461,15 @@
 
 .fg-alert-detail-row > span:first-child {
   color: var(--color-text-muted);
+  white-space: nowrap;      /* ✅ keeps "Txn ID" on one line */
+  flex-shrink: 0;           /* ✅ */
 }
 
 .fg-alert-detail-row strong {
   font-weight: 500;
   text-align: right;
+  min-width: 0;             /* ✅ */
+  word-break: break-word;   /* ✅ */
 }
 
 .fg-alert-amount {
@@ -2464,10 +2479,13 @@
 
 .fg-alert-txn-id {
   font-size: var(--font-size-xs);
+  word-break: break-all;    /* ✅ long codes like TX1792692483918 */
 }
 
 .fg-alert-time {
   font-size: var(--font-size-xs);
+  text-align: right;        /* ✅ */
+  min-width: 0;             /* ✅ */
 }
 
 /* Extra Details */
@@ -2480,6 +2498,7 @@
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  word-break: break-word;   /* ✅ */
 }
 
 .fg-alert-extra-details p {
@@ -2512,6 +2531,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-normal);
+  white-space: nowrap;      /* ✅ */
 }
 
 .fg-alert-action:disabled {
@@ -2562,15 +2582,12 @@
     align-items: flex-start;
   }
 
-  .fg-alert-actions {
-    flex-direction: column;
-  }
-
+  /* ✅ removed flex-direction: column, so the buttons stay in one row */
   .fg-alert-action {
-    width: 100%;
+    font-size: 13px;
+    padding: 9px 4px;
   }
 }
-
 /* ================================
    ADMIN SIDEBAR
 ================================ */
