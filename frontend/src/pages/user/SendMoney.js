@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from "../../api/config";
 
@@ -13,6 +13,15 @@ const SendMoney = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(null);
+
+  // ✅ NEW: track mobile screen
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -57,6 +66,32 @@ const SendMoney = () => {
     return "#28a745";
   };
 
+  // ✅ NEW: shared card style (responsive padding)
+  const cardStyle = {
+    background: "white",
+    borderRadius: "16px",
+    padding: isMobile ? "20px" : "30px",
+    flex: isMobile ? "none" : 1,
+    width: isMobile ? "100%" : "auto",
+    boxSizing: "border-box",
+    minWidth: 0,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
+  };
+
+  // ✅ NEW: row style for details (prevents label/value overlap)
+  const rowStyle = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: "12px"
+  };
+
+  const valueStyle = {
+    fontWeight: "500",
+    textAlign: "right",
+    wordBreak: "break-all"
+  };
+
   return (
     <div>
 
@@ -72,21 +107,14 @@ const SendMoney = () => {
       <div
         style={{
           display: "flex",
+          flexDirection: isMobile ? "column" : "row", // ✅ stack on mobile
           gap: "25px",
-          alignItems: "flex-start"
+          alignItems: isMobile ? "stretch" : "flex-start"
         }}
       >
 
         {/* Send Money Form */}
-        <div
-          style={{
-            background: "white",
-            borderRadius: "16px",
-            padding: "30px",
-            flex: 1,
-            boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
-          }}
-        >
+        <div style={cardStyle}>
 
           <h5
             style={{
@@ -219,11 +247,7 @@ const SendMoney = () => {
         {success && (
           <div
             style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "30px",
-              flex: 1,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              ...cardStyle,
               borderTop: `4px solid ${getRiskColor(
                 success.risk_score
               )}`
@@ -294,27 +318,17 @@ const SendMoney = () => {
               }}
             >
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between"
-                }}
-              >
-                <span style={{ color: "#888" }}>
+              <div style={rowStyle}>
+                <span style={{ color: "#888", whiteSpace: "nowrap" }}>
                   Transaction ID
                 </span>
 
-                <span style={{ fontWeight: "500" }}>
+                <span style={valueStyle}>
                   {success.transaction?.txn_code}
                 </span>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between"
-                }}
-              >
+              <div style={rowStyle}>
                 <span style={{ color: "#888" }}>
                   Amount
                 </span>
@@ -332,12 +346,7 @@ const SendMoney = () => {
                 </span>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between"
-                }}
-              >
+              <div style={rowStyle}>
                 <span style={{ color: "#888" }}>
                   Risk Score
                 </span>
@@ -354,12 +363,7 @@ const SendMoney = () => {
                 </span>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between"
-                }}
-              >
+              <div style={rowStyle}>
                 <span style={{ color: "#888" }}>
                   Status
                 </span>
@@ -429,15 +433,7 @@ const SendMoney = () => {
 
         {/* Info Card when no result */}
         {!success && (
-          <div
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "30px",
-              flex: 1,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)"
-            }}
-          >
+          <div style={cardStyle}>
 
             <h5
               style={{
